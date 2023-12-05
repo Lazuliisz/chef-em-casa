@@ -1,0 +1,31 @@
+// Define as variaveis das cores
+
+$color1: #0043fa;
+$color2: #ff009d;
+$color3: #ff0000;
+
+// Insirir as cores no bootstrap
+
+$theme-color: (
+    'color1':$color1,
+    'color2': $color2,
+    'color3':$color3
+);
+
+// torna a fonte espanciva,mas por padrao ela ja vem ativada
+
+$enable-responsive-font-size: true !default;
+
+// Ativa a sombra de todos os elementos
+
+$enable-shadows: false !default;
+
+// Para desativar os cantos arredondados dos elementos
+
+$enable-rounded: true !default;
+
+// Adiciona as cores com um degradê
+
+$enable-gradients: false !default;
+
+@import "../../node_modules/bootstrap/scss/bootstrap.scss";
