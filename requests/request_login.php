@@ -1,51 +1,49 @@
 <?php
-  // inicia a sessão
-  session_start();
+// Iniciar a sessão
+session_start();
 
+include_once ('../helpers/database.php');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $name = $_POST["name"];
-  $email = $_POST["email"];
-  $password = $_POST["password"];
+    $name = $_POST["name"];
+    $email = $_POST["email"];
+    $password = $_POST["password"];
 
-  $connection = connectDatabase();
+    $connection = connectDatabase();
 
-  // Usar prepared statements para proteger contra SQL injection
-  $name = mysqli_real_escape_string($connection, $name);
-  $email = mysqli_real_escape_string($connection, $email);
-  $password= mysqli_real_escape_string($connection, $password);
+    // Usar prepared statements para proteger contra SQL injection
+    $name = mysqli_real_escape_string($connection, $name);
+    $email = mysqli_real_escape_string($connection, $email);
+    $password= mysqli_real_escape_string($connection, $password);
 
+    $query = "SELECT * FROM users WHERE email = '$email'";
 
-  $password_hashed = password_hash($password, PASSWORD_DEFAULT);
+    $result = mysqli_query($connection, $query);
 
-  $query = "INSERT INTO users (name, email, password, level) VALUES ('$name', '$email', '$password_hashed', 'common')";
+    if(mysqli_num_rows($result) > 0){
+        // Transforma o resultado em um array associativo
+        $row = mysqli_fetch_assoc($result);
 
-  $result = mysqli_query($connection, $query);
+        // Verifica se a senha digitada é a mesma do banco, que está criptografada
+        if(password_verify($password, $row['password'])){
 
-  if(mysqli_rum_rows($result) > 0){
+            // Armazenar o ID do usuário e o nome
+            $_SESSION['user_id'] = $row['id'];
+            $_SESSION['user_name'] = $row['name'];
+            $_SESSION['user_level'] = $row['level'];
 
-     // trasnforma o rsultado em array associativa
-     $row = mysqli_fet_assoc($result);
+            // Redirecionar para o dashboard
+            header("Location: ../admin/index.php");
+        }else{
+            // Falar esta incorreta
+            $_SESSION['login_error'] = 'Senha está incorreta';
+            header("Location: ../login.php");
+        }
 
-      if(password_verify($password, $row['password'])){
-      
-        // Armazena o id do usuario e o nome 
-        $_SESSION['user_id'] = $rwo['id'];
-        $_SESSION['user_name'] = $rwo['name'];
+    }else{
+        $_SESSION['login_error'] = 'E-mail incorreto ou não existe';
+        header("Location: ../login.php");
+    }
 
-        // redireciona para o dashboard
-        header("Location: ../admin/index.php");
-
-      }else{
-
-        // falar q esta incorreta
-        $_SESSION['login_error'] = 'Senha está incorreta';
-        header("Location:../login.php");
-      }
-
-  }else{
-    
-    $_SESSION['login_error'] = 'Email está incorreto ou não existe';
-    header("Location:../login.php");
-  }
+    mysqli_close($connection);
 }
